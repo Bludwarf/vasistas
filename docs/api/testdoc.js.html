@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: testdoc.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: testdoc.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>			function Zone(options) {
+				var thisZone = this;
+				
+				this.title = options.title;
+				if (options.places == null) throw "Zone : places vide";
+				this.photo = options.photo;
+				this.i = nZone++;
+				this.color = (options.color ? options.color : "#0000FF");
+				
+				this.places = (options.places ? [] : null);
+				$.each(options.places, function(i, placeOptions) {
+					if ((placeOptions.x != null || placeOptions.y != null) &amp;&amp; thisZone.photo == null) throw "Zone : photo vide alors que x;y spécifiés";
+					var place = new Place({
+						lat: placeOptions.lat,
+						lng: placeOptions.lng,
+						title: placeOptions.name
+					}).appearsAt(placeOptions.x, placeOptions.y, photo);
+					thisZone.places[thisZone.places.length] = place;
+				});
+				
+				/**
+				 * id utilisable pour base pour des id d'éléments HTML
+				 */
+				this.getId = function() {
+					return "zone"+this.i;
+				};
+				
+				/**
+				 * Titre à afficher sur la photo ou sur la carte
+				 */
+				this.getTitle = function() {
+					return this.title;
+				};
+				
+				/**
+				 * 
+				 */
+				this.getPaths = function() {
+					var paths = [];
+					$.each(this.places, function(i, place) {
+						paths[paths.length] = place.getLatLng();
+					});
+					return paths;
+				};
+				
+				/**
+				 * Polygone à afficher sur la carte Google
+				 * @return google.maps.Polygon
+				 *
+				 * @see https://developers.google.com/maps/documentation/javascript/3.exp/reference#PolygonOptions
+				 */
+				this.getPolygon = function() {
+					if (!this.polygon) {
+						var thisZone = this;
+						console.log("get");
+						var poly = new google.maps.Polygon({
+						  paths: this.getPaths(),
+						  strokeColor: this.color,
+						  strokeOpacity:0.8,
+						  strokeWeight:2,
+						  fillColor: this.color,
+						  fillOpacity:0.1,
+						  title: this.title,
+						});
+						poly.addListener('mouseover', function(event) {
+							thisZone.hover(event);
+						});
+						poly.addListener('mouseout', function(event) {
+							thisZone.hoverOut(event);
+						});
+						poly.addListener('click', function(event) {
+							thisZone.click(event);
+						});						
+						this.polygon = poly;
+					}
+					return this.polygon;
+				};
+				
+				/**
+				 * @return Place
+				 */
+				this.getCenter = function() {
+					var center = this.getBounds().getCenter();
+					var place = new Place({
+						lat: center.lat(),
+						lng: center.lng(),
+						x: 'todo', // TODO : center x,y
+						y: 'todo'
+					});
+					return place;
+				}
+				
+				/**
+				 * @return Bounds
+				 */
+				this.getBounds = function() {
+					var bounds = new google.maps.LatLngBounds();
+					
+					$.each(this.places, function(i, place) {
+						bounds.extend(place.getLatLng());
+					});
+					
+					return bounds;
+				}
+				
+				/**
+				 * @return les différents répères qui délimite cette zone
+				 * @see Place
+				 */
+				this.getPlace = function(i) {
+					return this.places[i];
+				}
+				
+				
+				// https://developers.google.com/maps/documentation/javascript/examples/layer-data-simple
+				// https://developers.google.com/maps/documentation/javascript/3.exp/reference#PolygonOptions
+				/**
+				 * @param {google.maps.Map} map	Carte Google où tracer cette zone
+				 */
+				this.setMap = function(map) {
+					this.getPolygon().setMap(map);
+				}
+				
+				/**
+				 * @param {Photo} photo Photo où apparait cette zone
+				 */
+				this.setPhoto = function(photo) {
+					this.photo = photo;
+					this.getSVG();
+				}
+				
+				/**
+				 * On a cliqué sur la zone depuis :
+				 * &lt;ul>
+				 * &lt;li>Son nom dans l'IHM (ou son bouton)&lt;/li>
+				 * &lt;li>La carte Google&lt;/li>
+				 * &lt;li>La photo&lt;/li>
+				 * &lt;/ul>
+				 * @param event : JS ou Google !
+				 */
+				this.click = function(event) {
+					if (event.stopPropagation) event.stopPropagation(); // on intercepte le click et on le garde pour nous
+					
+					// Zoom dans la map
+					var poly = this.getPolygon();
+					//window.poly = poly; // variable globale
+					poly.get('map').setCenter(this.getCenter().getLatLng());
+				}
+				
+				/**
+				 * Dessine en SVG la zone sur la photo associée. La photo doit se trouver dans un élément SVG d'id "#idDeLaZone-svg".
+				 * @return le SVG qui contient toute la photo
+				 */
+				this.getSVG = function() {
+					var id = this.getId();
+					if (this.svg == null) {
+						var d = this.getSVGPath();
+						var svg =
+							  '&lt;path class="zone-svg" id="' + id + '-svg" d="' + d + '"'
+							+ ' onclick="zones.' + id + '.click(event)"'
+							+ ' onmouseover="zones.' + id + '.hover(event)"'
+							+ ' onmouseout="zones.' + id + '.hoverOut(event)"'
+							+ ' onclick="zones.' + id + '.click(event)"'
+							+ '>'
+							+	'	&lt;title>' + this.title + '&lt;/title>'
+							+ '&lt;/path>'
+						;
+						this.photo.append(svg);
+						
+						var $svg = $("#" + id + "-svg");
+						$svg.css({
+							fill: this.color,
+							stroke: this.color,
+						});
+						
+						this.svg = $svg.get(0); // FIXME : à cause du photo.append on ne peut pas garder la ref vers le SVG
+					}
+					//return this.svg;
+					return $("#" + id + "-svg").get(0);
+				}
+				
+				// Utilisée par this.getSVG()
+				this.getSVGPath = function() {
+					var d = "M";
+					$.each(this.places, function(i, place) {
+						d += place.getX() + "," + place.getY() + " ";
+					});
+					d += "Z";
+					return d;
+				}
+				
+				/**
+				 * Lie un bouton HTML à cette zone.
+				 */
+				this.addButton = function(btn) {
+					this.btn = btn;
+					var id = this.getId();
+					var thisZone = this;
+					var $btn = $(btn);
+					
+					$btn.hover(function(event) {
+						thisZone.hover(event);
+					}, function(event) {
+						thisZone.hoverOut(event);
+					});
+					$btn.click(function(event) {
+						thisZone.click(event);
+					});
+					
+					// Couleur
+					$btn.css({
+						//background: 'inherit', // FIXME : éclaircir une couleur
+						borderColor: this.color,
+					});
+				}
+				
+				/**
+				 * On survole la zone sur la carte Google ou bien sur la photo ou bien dans l'IHM HTML
+				 */
+				this.hover = function(event) {
+					$(this.btn).addClass('place-hover');
+					this.getSVG().addClass('zone-svg-hover');
+					this.getPolygon().setOptions({strokeWeight: 2, fillOpacity: 0.35}); // TODO : backup styles
+				}
+				
+				/**
+				 * @see hover
+				 */
+				this.hoverOut = function(event) {
+					$(this.btn).removeClass('place-hover');
+					this.getSVG().removeClass('zone-svg-hover');
+					this.polygon.setOptions({strokeWeight: 1, fillOpacity: 0.1});
+				}
+				
+				// Photo
+				if (options.photo) {
+					this.setPhoto(this.photo);
+				}
+				
+				// Map
+				if (options.map) {
+					this.setMap(options.map);
+				}
+			}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addButton">addButton</a></li><li><a href="global.html#click">click</a></li><li><a href="global.html#getBounds">getBounds</a></li><li><a href="global.html#getCenter">getCenter</a></li><li><a href="global.html#getId">getId</a></li><li><a href="global.html#getPaths">getPaths</a></li><li><a href="global.html#getPlace">getPlace</a></li><li><a href="global.html#getPolygon">getPolygon</a></li><li><a href="global.html#getSVG">getSVG</a></li><li><a href="global.html#getTitle">getTitle</a></li><li><a href="global.html#hover">hover</a></li><li><a href="global.html#hoverOut">hoverOut</a></li><li><a href="global.html#setMap">setMap</a></li><li><a href="global.html#setPhoto">setPhoto</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 08 2015 18:34:06 GMT+0200 (Paris, Madrid (heure d’été))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
