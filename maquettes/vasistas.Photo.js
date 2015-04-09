@@ -10,9 +10,20 @@
  *     3 - getVisibleWidth()
  */
 // image totale (attention valable uniquement sans bordure autour de l'image)
+
+// FIXME : actuellement ecran correspond au SVG d'id "ecran" alors on doit absolument lancer ce script après le SVG
+
 var photo = {
     'offsetXMax': ecran.width.baseVal.value - 1, // 1250 avec le Debug Chrome
     'offsetYMax': ecran.height.baseVal.value - 1,
+    
+    /**
+     * @param {SVGElement} ecran élément SVG contenant la photo JPEG associée à cet objet
+     */
+    setEcran: function(ecran) {
+        this.offsetXMax = ecran.width.baseVal.value - 1;
+        this.offsetYMax = ecran.height.baseVal.value - 1;
+    },
 
     /**
      * Direction sur l'intervalle [0;360) (cf. "heading" qui lui est sur [-180;180) dans la lib geometry : https://developers.google.com/maps/documentation/javascript/reference#Distance)
