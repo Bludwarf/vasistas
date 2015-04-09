@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <title>Vasistas - Géolocalisation sur un paysage</title> 
+		
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+	<script src="http://maps.googleapis.com/maps/api/js?libraries=geometry"></script>
+	<script src="unit.js"></script>
+	<script src="../maquettes/vasistas.Zone.js"></script>
+    <!--<script src="js/svg-utils.js"></script>-->
+    <!--<script src="js/stab.js"></script>-->
+    <!--<script src="js/basse.js"></script>-->
+	<style type="text/css">
+	
+		
+		
+	</style>
+	
+	<script type="text/javascript">
+	
+		// Pré-requis : tests "Place" OK
+	
+		// Test de Zone
+		var zone;
+		
+		// Zone sans places
+		var testPlacesVides = function () {
+			return new Zone({
+				title: "titre"
+			});
+		};
+		
+		unitjs.exception(testPlacesVides)
+			.isError()
+			.hasMessage("Zone : places vide");
+		
+		
+		// Titre
+		zone = new Zone({
+			title: "titre",
+		});
+		unitjs.value(zone.getTitle()).isEqualTo("titre");*/
+		
+	</script>
+	
+    </head>
+    <body>
+	
+
+    </body>
+</html>

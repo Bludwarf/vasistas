@@ -81,6 +81,82 @@
 		
 	</style>
 	
+    <script type="text/javascript" src="vasistas.Place.js"></script>
+    <script type="text/javascript" src="vasistas.Zone.js"></script>
+	
+    </head>
+    <body>
+	
+		
+		
+		<div id="left">
+			<div id="googleMap"></div>
+			<div id="menu" >
+				<div id="places">
+					<ul class="places-list">
+						<!--<li class="place">Lac Anda.</li>	-->
+					</ul>
+				</div>
+			</div>
+		</div>
+
+        <!--<object data="Basse.svg" type="image/svg+xml" id="alphasvg" width="100%" height="100%"></object>-->
+		<!-- width="693px"
+	 height="2371px" -->
+		<!-- width="100%" height="90%" -->
+		<!-- viewBox="0 0 693 2371" -->
+		<!-- viewBox="0 300 693 1575" -->
+		<div class="svg-container">
+			<svg id="ecran" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" 
+			viewBox="0 0 1920 1080" enable-background="new 0 0 693 2371" xml:space="preserve">
+				
+				<image class="photo" x="0" y="0" width="1920" height="1080" xlink:href="../photos/rova.jpg" /><!-- 265.559861911151° + 71.3144809503602° -->
+				
+				
+				
+				<!-- Lignes boussole -->
+				
+				<line x1="120"  y1="0" x2="120"  y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-width="3"       />	<!-- 270°   : W -->
+				<text x="124" y="14" text-anchor="start" fill="#FFF">W</text>
+				
+				<line x1="725"  y1="0" x2="725"  y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-dasharray="5,5" />	<!-- 292.5° : NWW -->
+				<text x="729" y="14" text-anchor="start" fill="#FFF">NWW</text>
+				
+				<line x1="1331" y1="0" x2="1331" y2="1080" style="stroke:#FFF; opacity: 0.5;" />						<!-- 315°   : NW -->
+				<text x="1335" y="14" text-anchor="start" fill="#FFF">NW</text>
+				
+				<line x1="1937" y1="0" x2="1937" y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-dasharray="5,5" />	<!-- 337.5° : NNW -->
+				<text x="1941" y="14" text-anchor="start" fill="#FFF">NNW</text>
+				
+				
+				
+				<!-- horizon -->
+				<line x1="0" y1="267" x2="1920" y2="267" style="stroke:#FFF; opacity: 1;" stroke-dasharray="5,5" />
+				
+				<!-- Axe myPlace - lac Anda -->
+				<!--<line x1="250" y1="0" x2="250" y2="1080" style="stroke:#0000FF; opacity: 1;" />
+				<line x1="327" y1="0" x2="327" y2="1080" style="stroke:#0000FF; opacity: 1;" />
+				<line x1="250" y1="417" x2="276" y2="472" style="stroke:#00AAFF; opacity: 1;" />
+				<line x1="40" y1="0" x2="585" y2="1080" style="stroke:#FF0000; opacity: 1;" />--> <!-- jonction avec le centre (x=960) : y=1824 -->
+				
+				<!-- Axe arrête - lac Anda "D" -->
+				<!--<line x1="109" y1="0" x2="677" y2="1080" style="stroke:#FF0000; opacity: 1;" />-->				
+				
+				<!-- Position de la souris -->
+				
+				<text id="infos" x="4" y="14" text-anchor="start" fill="#FFF" style="text-shadow: 0px 0px 2px #000;" pointer-events="none">
+					<tspan class="angle">265.6°</tspan>
+					<tspan class="x" 		x="4" dy="1.2em">x=1</tspan>
+					<tspan class="offsetX" 	x="4" dy="1.2em">offsetX=1</tspan>
+					<tspan class="zoom" 	x="4" dy="1.2em">zoom=100%</tspan>
+				</text>
+
+			</svg>
+		</div>
+        
+        
+        
+    <script type="text/javascript" src="vasistas.Photo.js"></script>
 	<script type="text/javascript">
 	
 	
@@ -122,587 +198,6 @@
 					- alors créer un lien entre idMap et idPhoto via des points de convergence (x,y) sur la photo idPhoto
 			 
 			 */
-		
-			points = {};
-			points.rova  = new google.maps.LatLng(-18.92348100124909, 47.53185215892805);
-			points.lac   = new google.maps.LatLng(-18.9226356424, 47.5148770807); // 273.01081393192686° x=252
-			points.anosy = new google.maps.LatLng(-18.91366689, 47.5221688827); // 316.97226770386897° x=1360
-			points.usine = new google.maps.LatLng(-18.92279776874189, 47.51983074455688); // 
-		
-			/**
-			 * Coordonnées Google Earth
-			 * lng : West-East   <=> x
-			 * lat : North-South <=> y
-			 * alt : altitude
-			 */
-		
-			/**
-			 * Associe une photo à un endroit, en indiquant où l'endroit apparait sur cette photo
-			 */
-			function Place(options) {			
-				this.name = options.title;
-				this.photo = null;
-				this.x = (options.x != null ? options.x : -1); // sur la photo
-				this.y = (options.y != null ? options.y : -1); // sur la photo
-				this.posX = -1; // position par rapport à la taille de la photo (de 0 à 1 inclus)
-				this.posY = -1; // position par rapport à la taille de la photo (de 0 à 1 inclus)
-				this.heading = null; // [-180;180) direction terrestre par rapport à l'objectif calculée par Google Map
-				
-				this.latLng = null; // position réelle sur Terre
-				if (options.position != null) {
-					this.latLng = options.position;
-				}
-				else if (options.lat != null || options.lng != null) {
-					if (!(options.lat != null && options.lng != null)) throw "Place : lat et lng doivent être spécifié en même temps ou pas du tout";
-					this.latLng = new google.maps.LatLng(options.lat, options.lng	);
-				}
-				
-				this.coords = null; // Coords
-				
-				this.getName = function() {
-					return this.name;
-				}
-				
-				this.setName = function(name) {
-					this.name = name;
-				}
-				
-				this.getX = function() {
-					return this.x;
-				}
-				
-				this.getY = function() {
-					return this.y;
-				}
-				
-				this.setPhoto = function(photo) {
-					this.photo = photo;
-				}
-				
-				this.appearsAt = function(x, y, photo) {
-					if (photo == null) {
-						if (this.photo == null) throw 'Place.appearsAt : Vous devez indiquer à quelle photo est rattaché cet endroit';
-						photo = this.photo;
-					}
-					else {
-						if (this.photo != null && photo != this.photo) throw 'Place.appearsAt : Impossible d\'associer un endroit à plusieurs photos dans cette version';
-						this.photo = photo;
-					}
-					
-					this.x = x;
-					this.y = y;
-					this.posX = x / photo.getWidth();
-					this.posY = y / photo.getHeight();
-					
-					this.heading = null; // heading à recalculer
-					
-					photo.addPlace(this);
-					
-					return this;
-				}
-				
-				/**
-				 * Tels qu'ils apparaissent dans un export KML (lng puis lat)
-				 */ 
-				this.setCoords = function(lng, lat) {
-					this.setLatLng(new google.maps.LatLng(lat, lng));
-				}
-				
-				this.serialize = function() {
-					return "'" + this.name + "':" + this.posX + "," + this.posY + " (" + this.getDirection() + "°)";
-				}
-				
-				this.setLatLng = function(latLng) {
-					this.latLng = latLng;
-				}
-				
-				this.getLatLng = function() {
-					return this.latLng;
-				}
-				
-				/**
-				 * Direction terrestre
-				 */
-				this.getDirection = function() {
-					if (this.heading == null) {
-						var from = this.photo.getLatLng();
-						var to = this.latLng;
-						if (to == null) throw "this.getDirection : impossible d'avoir la direction vers un point inconnu sur la carte";
-						this.heading = google.maps.geometry.spherical.computeHeading(from, to);
-					}
-					return (this.heading+360)%360;
-				}
-				
-				/**
-				 * Angle sur la photo
-				 */
-				this.getAngle = function() {
-					var xMax = this.photo.getWidth();
-					var ratio = this.getX() / xMax;
-					//console.log(this.getX() + " / " + xMax);
-					return ratio * this.photo.getAngle();
-				}
-				
-				// options : https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
-				this.getMarker = function() {
-					return new google.maps.Marker({
-						position: this.getLatLng(),
-						title: this.getName(),
-					});
-				}
-			}
-			
-			var nZone = 0;
-			function Zone(options) {
-				var thisZone = this;
-				
-				this.title = options.title;
-				if (options.places == null) throw "Zone : places vide";
-				this.photo = options.photo;
-				this.i = nZone++;
-				this.color = (options.color ? options.color : "#0000FF");
-				
-				this.places = (options.places ? [] : null);
-				$.each(options.places, function(i, placeOptions) {
-					if ((placeOptions.x != null || placeOptions.y != null) && thisZone.photo == null) throw "Zone : photo vide alors que x;y spécifiés";
-					var place = new Place({
-						lat: placeOptions.lat,
-						lng: placeOptions.lng,
-						title: placeOptions.name
-					}).appearsAt(placeOptions.x, placeOptions.y, photo);
-					thisZone.places[thisZone.places.length] = place;
-				});
-				
-				this.getId = function() {
-					return "zone"+this.i;
-				};
-				
-				this.getTitle = function() {
-					return this.title;
-				};
-				
-				this.getPaths = function() {
-					var paths = [];
-					$.each(this.places, function(i, place) {
-						paths[paths.length] = place.getLatLng();
-					});
-					return paths;
-				};
-				
-				this.getPaths = function() {
-					var paths = [];
-					$.each(this.places, function(i, place) {
-						paths[paths.length] = place.getLatLng();
-					});
-					return paths;
-				};
-				
-				this.getPolygon = function() {
-					if (!this.polygon) {
-						var thisZone = this;
-						console.log("get");
-						var poly = new google.maps.Polygon({
-						  paths: this.getPaths(),
-						  strokeColor: this.color,
-						  strokeOpacity:0.8,
-						  strokeWeight:2,
-						  fillColor: this.color,
-						  fillOpacity:0.1,
-						  title: this.title,
-						});
-						poly.addListener('mouseover', function(event) {
-							thisZone.hover(event);
-						});
-						poly.addListener('mouseout', function(event) {
-							thisZone.hoverOut(event);
-						});
-						poly.addListener('click', function(event) {
-							thisZone.click(event);
-						});						
-						this.polygon = poly;
-					}
-					return this.polygon;
-				};
-				
-				/**
-				 * return Place
-				 */
-				this.getCenter = function() {
-					var center = this.getBounds().getCenter();
-					var place = new Place({
-						lat: center.lat(),
-						lng: center.lng(),
-						x: 'todo', // TODO : center x,y
-						y: 'todo'
-					});
-					return place;
-				}
-				
-				/**
-				 * return Bounds
-				 */
-				this.getBounds = function() {
-					var bounds = new google.maps.LatLngBounds();
-					
-					$.each(this.places, function(i, place) {
-						bounds.extend(place.getLatLng());
-					});
-					
-					return bounds;
-				}
-				
-				this.getPlace = function(i) {
-					return this.places[i];
-				}
-				
-				
-				// https://developers.google.com/maps/documentation/javascript/examples/layer-data-simple
-				// https://developers.google.com/maps/documentation/javascript/3.exp/reference#PolygonOptions
-				this.setMap = function(map) {
-					this.getPolygon().setMap(map);
-				}
-				
-				this.setPhoto = function(photo) {
-					this.photo = photo;
-					this.getSVG();
-				}
-				
-				/**
-				 * event : JS ou Google !
-				 */
-				this.click = function(event) {
-					if (event.stopPropagation) event.stopPropagation(); // on intercepte le click et on le garde pour nous
-					
-					// Zoom dans la map
-					var poly = this.getPolygon();
-					//window.poly = poly; // variable globale
-					poly.get('map').setCenter(this.getCenter().getLatLng());
-				}
-				
-				this.getSVG = function() {
-					var id = this.getId();
-					if (this.svg == null) {
-						var d = this.getSVGPath();
-						var svg =
-							  '<path class="zone-svg" id="' + id + '-svg" d="' + d + '"'
-							+ ' onclick="zones.' + id + '.click(event)"'
-							+ ' onmouseover="zones.' + id + '.hover(event)"'
-							+ ' onmouseout="zones.' + id + '.hoverOut(event)"'
-							+ ' onclick="zones.' + id + '.click(event)"'
-							+ '>'
-							+	'	<title>' + this.title + '</title>'
-							+ '</path>'
-						;
-						this.photo.append(svg);
-						
-						var $svg = $("#" + id + "-svg");
-						$svg.css({
-							fill: this.color,
-							stroke: this.color,
-						});
-						
-						this.svg = $svg.get(0); // FIXME : à cause du photo.append on ne peut pas garder la ref vers le SVG
-					}
-					//return this.svg;
-					return $("#" + id + "-svg").get(0);
-				}
-				
-				this.getSVGPath = function() {
-					var d = "M";
-					$.each(this.places, function(i, place) {
-						d += place.getX() + "," + place.getY() + " ";
-					});
-					d += "Z";
-					return d;
-				}
-				
-				this.addButton = function(btn) {
-					this.btn = btn;
-					var id = this.getId();
-					var thisZone = this;
-					var $btn = $(btn);
-					
-					$btn.hover(function(event) {
-						thisZone.hover(event);
-					}, function(event) {
-						thisZone.hoverOut(event);
-					});
-					$btn.click(function(event) {
-						thisZone.click(event);
-					});
-					
-					// Couleur
-					$btn.css({
-						//background: 'inherit', // FIXME : éclaircir une couleur
-						borderColor: this.color,
-					});
-				}
-				
-				this.hover = function(event) {
-					$(this.btn).addClass('place-hover');
-					this.getSVG().addClass('zone-svg-hover');
-					this.getPolygon().setOptions({strokeWeight: 2, fillOpacity: 0.35}); // TODO : backup styles
-				}
-				
-				this.hoverOut = function(event) {
-					$(this.btn).removeClass('place-hover');
-					this.getSVG().removeClass('zone-svg-hover');
-					this.polygon.setOptions({strokeWeight: 1, fillOpacity: 0.1});
-				}
-				
-				// Photo
-				if (options.photo) {
-					this.setPhoto(this.photo);
-				}
-				
-				// Map
-				if (options.map) {
-					this.setMap(options.map);
-				}
-			}
-		
-			/**
-			 * Il faut distinguer 3 types de mesures différentes :
-			 *     1 - La taille de la photo réelle (par exemple 1920 x 1080) : en pixels photo
-			 *     2 - La taille de ce qu'on affiche sur l'écran (en pixel sur l'écran réel) (par exemple 640 x 480) : en pixels écran
-			 *     3 - La taille de ce qui est visible de la photo originale (par exemple le centre de la photo avec un zoom à 200%) : en pixels photo
-			 *
-			 * Dans le code cela se traduit par des méthodes portant les noms suivants :
-			 *     1 - getWidth()
-			 *     2 - getWidthOnScreen()
-			 *     3 - getVisibleWidth()
-			 */
-			// image totale (attention valable uniquement sans bordure autour de l'image)
-			var photo = {
-				'offsetXMax': ecran.width.baseVal.value - 1, // 1250 avec le Debug Chrome
-				'offsetYMax': ecran.height.baseVal.value - 1,
-				
-				/**
-				 * Direction sur l'intervalle [0;360) (cf. "heading" qui lui est sur [-180;180) dans la lib geometry : https://developers.google.com/maps/documentation/javascript/reference#Distance)
-				 *
-				 * Conversions :
-				 * direction = (heading+360)%360
-				 * heading   = (dir >= 180 ? dir-360 : dir)
-				 */
-				'directionMin': 265.559861911151,
-				
-				//'angle': 71.31448095, // [0..360) : calcul formule
-				'angle': 76.1786924567, // [0..360) : triangulation avec deux repères (lac+anosy) : 1108px/1920px = 43,9614537719°
-				'zoomed': false,
-				
-				'position': points.rova,
-				
-				'anchor': null, // LatLng : bord du lac à gauche actuellement
-				// http://www.movable-type.co.uk/scripts/latlong.html
-				// http://www.earthpoint.us/Convert.aspx
-				
-				/**
-				 * pixels écran -> pixels photo
-				 */
-				'getX' : function(offsetX) {
-					var ratio = offsetX / this.offsetXMax;
-					return this.getVisibleX() + Math.round(ratio * this.getVisibleWidth());
-				},
-				
-				/**
-				 * pixels écran -> pixels photo
-				 */
-				'getY' : function(offsetY) {
-					var ratio = offsetY / this.offsetYMax;
-					return this.getVisibleY() + Math.round(ratio * this.getVisibleHeight());
-				},
-				
-				/**
-				 * pixels écran -> pixels photo
-				 */
-				'getAngle' : function(offsetX) {
-					if (offsetX != null) throw "getAngle(offsetX) non implémenté";
-					else {
-						return this.angle;
-					}
-				},
-				
-				/**
-				 * LatLng
-				 */
-				'getPosition' : function() {
-					return this.position;
-				},
-				
-				/**
-				 * pixels photo
-				 */
-				'getWidth' : function() {
-					return $("image.photo", ecran).attr('width');
-				},
-				
-				/**
-				 * pixels photo
-				 */
-				'getHeight' : function() {
-					return $("image.photo", ecran).attr('height');
-				},
-				
-				/**
-				 * pixels écran -> orientation par rapport à la boussole (0 = Nord, 90 = Est)
-				 */
-				'getDirection' : function(offsetX) { // TODO perf : stocker les résultats pour chaque offsetX
-					var ratio = offsetX / this.offsetXMax;
-					//console.log(offsetX + " / " + offsetXMax);
-					return this.directionMin + ratio * this.angle % 360;
-				},
-				
-				'setHeading' : function(heading) {
-					this.directionMin = (heading+360)%360;
-				},
-				
-				'getHeading' : function() {
-					var dir = this.directionMin + this.angle / 2;
-					return (dir >= 180 ? dir-360 : dir);
-				},
-				
-				/**
-				 * 1 = zoom à 100%
-				 */
-				'getZoom': function() { // TODO : utiliser le zoom pour retrouver la marge d'erreur possible dû à la taille de l'affichage actuel (exemple : 50% => 2px d'erreur à l'écran) auqule on doit ajouter la marge d'erreur de l'utilisateur
-					return this.getWidthOnScreen() / this.getVisibleWidth(); // FIXME : le calcul du ZOOM ne semble pas bon alors que la fonction toggleZoom marche bien
-				},
-				
-				/**
-				 * La taille de l'image sur l'écran
-				 */
-				'getWidthOnScreen': function() {
-					return ecran.width.baseVal.value;
-				},
-				
-				/**
-				 * La taille de ce qui est visible sur l'écran par rapport à la photo réelle (en pixels photo)
-				 */
-				'getVisibleWidth': function() {
-					var view = ecran.viewBox.baseVal;
-					return view.width;
-				},
-				
-				/**
-				 * La taille de ce qui est visible sur l'écran par rapport à la photo réelle (en pixels photo)
-				 */
-				'getVisibleHeight': function() {
-					var view = ecran.viewBox.baseVal;
-					return view.height;
-				},
-				
-				/**
-				 * Le bord gauche de ce qui est visible sur l'écran par rapport à la photo réelle (en pixels photo)
-				 */
-				'getVisibleX': function() {
-					var view = ecran.viewBox.baseVal;
-					return view.x;
-				},
-				
-				/**
-				 * Le bord supérieur de ce qui est visible sur l'écran par rapport à la photo réelle (en pixels photo)
-				 */
-				'getVisibleY': function() {
-					var view = ecran.viewBox.baseVal;
-					return view.y;
-				},
-				
-				'toggleZoom': function(offsetX, offsetY) {
-					var x = this.getX(offsetX);
-					var y = this.getY(offsetY);
-					var z = 2 / 0.65; // On veut du 200%
-					//var z = 1 / 0.65; // On veut du 100%
-					
-					var view = ecran.viewBox.baseVal;
-					
-					if (!this.zoomed) {
-						this.zoom(z, offsetX, offsetY);
-					}
-					
-					else {
-						
-						// On trace la position par rapport à l'image
-						this.addPoint(x, y);
-						
-						view.x = 0; // FIXME : pas toujours vrai ?
-						view.y = 0; // FIXME : pas toujours vrai ?
-						view.width *= z;
-						view.height *= z;
-					}
-					
-					this.zoomed = !this.zoomed;
-				},
-				
-				// TODO : attention : ne marche plus quand on a scrollé la page !
-				'zoom': function(factor, offsetX, offsetY) {
-					var z = factor;
-					var view = ecran.viewBox.baseVal;
-					view.x += (1 - 1/z) * this.getX(offsetX);
-					view.y += (1 - 1/z) * this.getY(offsetY);
-					view.width /= z;
-					view.height /= z;
-				},
-				
-				/**
-				 * x,y (en pixels photo)
-				 */
-				'addPoint' : function(x, y) {
-					var name = "point";
-					var posX = x / this.getWidth();
-					var posY = y / this.getHeight();
-					
-					var place = new Place(name);
-					place.appearsAt(x, y, photo);
-					var coords = points.lac; // TODO : LatLng : bord du lac à gauche actuellement
-					place.setLatLng(coords);
-					console.log("addPoint : " + place.serialize());
-					console.log("  distance : " + google.maps.geometry.spherical.computeDistanceBetween(photo.getLatLng(), place.getLatLng()));
-					
-					// On change le répère de la photo si c'est le 1er point qu'on place
-					if (this.anchor == null) photo.setAnchor(place);
-					
-					// Création dans l'IHM
-					var html = '<text x="' + x + '" y="' + y + '" text-anchor="middle" fill="#FFF" pointer-events="none">' + name + '</text>';
-					this.append(html);
-				},
-				
-				/**
-				 * x,y (en pixels photo)
-				 */
-				'addPlace' : function(place) {
-				
-					// On change le répère de la photo si c'est le 1er point qu'on place
-					if (this.anchor == null) photo.setAnchor(place);
-					
-					// Création dans l'IHM
-					if (place.getName()) {
-						var html = '<text x="' + place.getX() + '" y="' + place.getY() + '" text-anchor="middle" fill="#FFF" pointer-events="none">' + place.getName() + '</text>';
-						this.append(html);
-					}
-				},
-				
-				/**
-				 * Repère sur la photo et localisé sur Terre pour en déduire l'orientation de la photo
-				 */
-				'setAnchor' : function(place) {
-					this.anchor = place.getLatLng();
-					
-					this.directionMin = (place.getDirection() - place.getAngle()) % 360;
-					console.log("place.getDirection = " + place.getDirection());
-					console.log("place.getAngle = " + place.getAngle());
-					console.log("this.directionMin = " + this.directionMin);
-					console.log("this.directionMin = " + this.directionMin);
-				},
-				
-				'append': function(html) {
-					$(ecran).append(html);
-					$(ecran).html($(ecran).html());
-				},
-				
-				'getLatLng': function() {
-					return this.position;
-				}
-			};
 			
 			var infos = {
 				'setAngle': function(angle) {
@@ -881,76 +376,6 @@
 		});
 		
 	</script>
-	
-    </head>
-    <body>
-	
-		
-		
-		<div id="left">
-			<div id="googleMap"></div>
-			<div id="menu" >
-				<div id="places">
-					<ul class="places-list">
-						<!--<li class="place">Lac Anda.</li>	-->
-					</ul>
-				</div>
-			</div>
-		</div>
-
-        <!--<object data="Basse.svg" type="image/svg+xml" id="alphasvg" width="100%" height="100%"></object>-->
-		<!-- width="693px"
-	 height="2371px" -->
-		<!-- width="100%" height="90%" -->
-		<!-- viewBox="0 0 693 2371" -->
-		<!-- viewBox="0 300 693 1575" -->
-		<div class="svg-container">
-			<svg id="ecran" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" 
-			viewBox="0 0 1920 1080" enable-background="new 0 0 693 2371" xml:space="preserve">
-				
-				<image class="photo" x="0" y="0" width="1920" height="1080" xlink:href="../photos/rova.jpg" /><!-- 265.559861911151° + 71.3144809503602° -->
-				
-				
-				
-				<!-- Lignes boussole -->
-				
-				<line x1="120"  y1="0" x2="120"  y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-width="3"       />	<!-- 270°   : W -->
-				<text x="124" y="14" text-anchor="start" fill="#FFF">W</text>
-				
-				<line x1="725"  y1="0" x2="725"  y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-dasharray="5,5" />	<!-- 292.5° : NWW -->
-				<text x="729" y="14" text-anchor="start" fill="#FFF">NWW</text>
-				
-				<line x1="1331" y1="0" x2="1331" y2="1080" style="stroke:#FFF; opacity: 0.5;" />						<!-- 315°   : NW -->
-				<text x="1335" y="14" text-anchor="start" fill="#FFF">NW</text>
-				
-				<line x1="1937" y1="0" x2="1937" y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-dasharray="5,5" />	<!-- 337.5° : NNW -->
-				<text x="1941" y="14" text-anchor="start" fill="#FFF">NNW</text>
-				
-				
-				
-				<!-- horizon -->
-				<line x1="0" y1="267" x2="1920" y2="267" style="stroke:#FFF; opacity: 1;" stroke-dasharray="5,5" />
-				
-				<!-- Axe myPlace - lac Anda -->
-				<!--<line x1="250" y1="0" x2="250" y2="1080" style="stroke:#0000FF; opacity: 1;" />
-				<line x1="327" y1="0" x2="327" y2="1080" style="stroke:#0000FF; opacity: 1;" />
-				<line x1="250" y1="417" x2="276" y2="472" style="stroke:#00AAFF; opacity: 1;" />
-				<line x1="40" y1="0" x2="585" y2="1080" style="stroke:#FF0000; opacity: 1;" />--> <!-- jonction avec le centre (x=960) : y=1824 -->
-				
-				<!-- Axe arrête - lac Anda "D" -->
-				<!--<line x1="109" y1="0" x2="677" y2="1080" style="stroke:#FF0000; opacity: 1;" />-->				
-				
-				<!-- Position de la souris -->
-				
-				<text id="infos" x="4" y="14" text-anchor="start" fill="#FFF" style="text-shadow: 0px 0px 2px #000;" pointer-events="none">
-					<tspan class="angle">265.6°</tspan>
-					<tspan class="x" 		x="4" dy="1.2em">x=1</tspan>
-					<tspan class="offsetX" 	x="4" dy="1.2em">offsetX=1</tspan>
-					<tspan class="zoom" 	x="4" dy="1.2em">zoom=100%</tspan>
-				</text>
-
-			</svg>
-		</div>
 
     </body>
 </html>
