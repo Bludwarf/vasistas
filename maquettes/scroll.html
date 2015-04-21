@@ -131,10 +131,6 @@
 			position: absolute;
 			top: 0;
 			left: 0;
-			cursor: -webkit-grab;
-			background: url('../photos/rova.jpg');
-			width: 1920px;
-			height: 1080px;
 		}
 		
 				
@@ -171,8 +167,8 @@
 		
 		<div id="middle">
 			<div id="tools">
-				<div class="tool">Move</div>
-				<div class="tool">Point</div>
+                <div class="tool" onclick="javascript:photo.selectTool(tools.move)">Move</div>
+				<div class="tool" onclick="javascript:photo.selectTool(tools.point)">Point</div>
 				<div class="tool">Angle</div>
 			</div>
 		</div>
@@ -212,11 +208,16 @@
     		var zoom=1;
             
             photo.init({
-                photo: "photo",
+                div: "photo",
+                photo: {
+                    filename: "../photos/rova.jpg",
+                    width: 1920,
+                    height: 1080
+                },
                 infos: "photo-infos",
                 dock: "photo-dock"
             });
-            photo.view.moveTo(0, 0);
+            photo.view.revealAll();
             //photo.view.zoom(2); 
 
     	});

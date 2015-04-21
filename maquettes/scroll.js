@@ -8,14 +8,26 @@
 var photo = {};
             
 photo.init = function(options) {
-    var divPhoto = $("#" + options.photo);
+    var divPhoto = $("#" + options.div);
     this.$div = divPhoto;
     this._zoom = 1;
     this.dragging = false;
-    
-    this.bindDrag();
-    
     this.view.init(this, $("#" + options.dock));
+    
+    this.setPhoto(options.photo);
+    
+    // Drag
+    //this.bindDrag();
+    this.selectTool(tools.move);
+    this.bindScroll();
+    
+    this.infos.init(options.infos);
+};
+
+photo.setPhoto = function(options) {
+    this.$div.css("background-image",   "url("+options.filename+")");
+    this.width(options.width);
+    this.height(options.height);
 };
 
 photo.bindDrag = function() {
@@ -34,54 +46,55 @@ photo.bindDrag = function() {
                 var dy = event.pageY - start.pageY;
                 var  x = x0 - dx / thisPhoto.zoom();
                 var  y = y0 - dy / thisPhoto.zoom();
-                thisPhoto.view.scrollBy(x, y);
+                thisPhoto.view.moveTo(x, y);
             });
             
             thisPhoto.dragging = true;
         }
     });
-    
-    $(window).mouseup(function(event) {
-        if (thisPhoto.dragging) {
-            $(window).unbind('mousemove');
-            thisPhoto.dragging = false;
-        }
-    });
+};
+
+photo.bindScroll = function() {
+    var photo = this;
     
     // Zoom
     // TODO : centrer le zoom sur le curseur
     // TODO : modifier le blocage min max du dragging en cas de zoom
-    var zoomSpeed=0.015;
+    var zoomSpeed=0.05;
 
     var zoomIn  = 1+zoomSpeed;
     var zoomOut = 1-zoomSpeed;
     this.$div.bind('mousewheel', function(e) {
-        var zoomMin = Math.min(
-            thisPhoto.view.width()  / thisPhoto.width(), // TODO : à deplacer plus haut
-            thisPhoto.view.height() / thisPhoto.height());
-        var zoom = thisPhoto.zoom();
+        var zoom = photo.zoom();
         if(e.originalEvent.wheelDelta /120 > 0) {
             zoom *= zoomIn;
         }
-        else if (zoom > zoomMin) {
-            zoom = Math.max(zoomMin, zoom * zoomOut);
+        else if (zoom > photo._zoomMin) {
+            zoom = Math.max(photo._zoomMin, zoom * zoomOut);
         }
-        var centerX = e.pageX - thisPhoto.view.$div.offset().left;
-        var centerY = e.pageY - thisPhoto.view.$div.offset().top;
-        var left = thisPhoto.view.left(centerX);
-        var top  = thisPhoto.view.top( centerY);
-        //thisPhoto.zoom(zoom, left, top);
-        thisPhoto.zoom(zoom);
-        
+        photo.zoom(zoom);
     });
 };
 
-photo.width = function() {
-    return 1920;
+photo.width = function(value) {
+    if (!value) return this._width;
+    this._width = value;
+    this.$div.css("width", value);
+    this.updateZoomMin();
 };
 
-photo.height = function() {
-    return 1080;
+photo.height = function(value) {
+    if (!value) return this._height;
+    this._height = value;
+    this.$div.css("height", value);
+    this.updateZoomMin();
+};
+
+// private
+photo.updateZoomMin = function() {
+    this._zoomMin = Math.min(
+        this.view.width()  / this.width(),
+        this.view.height() / this.height());
 };
 
 /**
@@ -91,6 +104,7 @@ photo.height = function() {
  * @param {type} y centre du zoom
  * @returns {@this;@pro;_zoom|@var;zoom|Number}
  */
+// TODO : en cas de zoom faisant apparaitre le fond, il faudrait center l'image plutôt que de la caler en haut à gauche
 photo.zoom = function(zoom, x, y) {
     if (typeof zoom == 'undefined') return this._zoom;
     
@@ -116,6 +130,8 @@ photo.view.init = function(photo, div) {
     this._zoom = 1;
 };
 
+// TODO : ajouter un listener pour maj la largeur et corriger le zoom 
+// à chaque redimensionnement de l'IHM
 photo.view.width = function() {
     return this.$div.width();
 };
@@ -158,10 +174,16 @@ photo.view.moveTo = function(x, y, zoom) {
     this.x = x;
     this.y = y;
     this._zoom = zoom;
+    
+    // infos
+    this.photo.infos.x(Math.round(x));
 };
 
 photo.view.centerTo = function(x, y, zoom) {
+    if (typeof x == 'undefined') x = this.x;
+    if (typeof y == 'undefined') y = this.y;
     zoom = zoom || this.photo.zoom();
+    
     var x0 = x - this.width()  / 2 / zoom;
     var y0 = y - this.height() / 2 / zoom;
     this.moveTo(x0, y0, zoom);
@@ -175,7 +197,107 @@ photo.view.top = function(y) {
     return this.y + y / this.photo.zoom();
 };
 
-photo.view.scrollBy = function(x, y) {
-	// Tenir compte du zoom
-    this.moveTo(x, y);
+photo.view.revealAll = function() {
+    this.photo.zoom(this.photo._zoomMin);
+};
+
+photo.infos = {};
+
+photo.infos.init = function(divId) {
+    var div = $("#"+divId);
+    this.$div = div;
+};
+
+photo.infos.x = function(x) {
+    this.$div.html("x = "+x);
+};
+
+photo.selectTool = function(tool) {
+    // Ancien outil
+    if (this._tool && this._tool.detachFrom) this._tool.detachFrom(this);
+    
+    // TODO : check si toutes les méthodes obligatoires sont présentes
+    tool.attachTo(this);
+    
+    this._tool = tool;
+};
+
+
+
+
+
+
+tools = {};
+
+tools.move = {};
+
+tools.move.attachTo = function(photo) {
+    this.photo = photo;
+    this.dragging = false;
+    
+    var tool = this;
+    
+    photo.$div.bind('mousedown', function(event) {
+        tool.mousedown(event); // pour garder this = photo
+    });
+    
+    $(window).mouseup(function(event) {
+        if (tool.dragging) {
+            $(window).unbind('mousemove');
+            tool.dragging = false;
+        }
+    });
+    
+    // Icon
+    photo.$div.css("cursor", "-webkit-grab");
+    
+    console.log("Tool 'move' selected");
+};
+
+tools.move.detachFrom = function(photo) {
+    photo.$div.unbind('mousedown');
+};
+
+tools.move.mousedown = function(event) {
+    var photo = this.photo;
+    
+    if (!this.dragging) {
+        // start drag
+        var start = event;
+        var x0 = photo.view.x;
+        var y0 = photo.view.y;
+
+        $(window).mousemove(function(event) {
+            var dx = event.pageX - start.pageX;
+            var dy = event.pageY - start.pageY;
+            var  x = x0 - dx / photo.zoom();
+            var  y = y0 - dy / photo.zoom();
+            photo.view.moveTo(x, y);
+        });
+
+        this.dragging = true;
+    }
+};
+
+
+
+tools.point = {};
+
+tools.point.attachTo = function(photo) {
+    this.photo = photo;
+    var tool = this;
+    
+    // Mousedown
+    photo.$div.bind('mousedown', function (event) {
+        tool.mousedown(event);
+    });
+    
+    // Curseur
+    photo.$div.css("cursor", "crosshair");
+    
+    console.log("Tool 'point' selected");
+};
+
+tools.point.mousedown = function(event) {
+    console.log("TODO : addPoint");
 };
