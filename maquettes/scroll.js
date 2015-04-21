@@ -25,17 +25,18 @@ photo.bindDrag = function() {
 
         if (!thisPhoto.dragging) {
             // start drag
-            var startX = event.pageX + thisPhoto.view.x;
-            var startY = event.pageY + thisPhoto.view.y;
+            var start = event;
+            var x0 = thisPhoto.view.x;
+            var y0 = thisPhoto.view.y;
 
             $(window).mousemove(function(event) {
-                console.log("startX   : "+startX);
-                console.log("leftStart: "+leftStartX);
-                console.log("scroll   : "+(startX - event.pageX));
-                console.log("scroll Z : "+(thisPhoto.view.left(startX) - thisPhoto.view.left(event.pageX)));
-                console.log("");    
-                thisPhoto.view.scrollBy((startX - event.pageX) / thisPhoto.zoom(), startY - event.pageY);
+                var dx = event.pageX - start.pageX;
+                var dy = event.pageY - start.pageY;
+                var  x = x0 - dx / thisPhoto.zoom();
+                var  y = y0 - dy / thisPhoto.zoom();
+                thisPhoto.view.scrollBy(x, y);
             });
+            
             thisPhoto.dragging = true;
         }
     });
