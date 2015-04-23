@@ -22,6 +22,9 @@ photo.init = function(options) {
     this.bindScroll();
     
     this.infos.init(options.infos);
+    
+    // Control points
+    this.points.init($("#"+options.ctrlPoints));
 };
 
 photo.setPhoto = function(options) {
@@ -73,6 +76,8 @@ photo.bindScroll = function() {
             zoom = Math.max(photo._zoomMin, zoom * zoomOut);
         }
         photo.zoom(zoom);
+        e.stopPropagation();
+        e.preventDefault(); // http://stackoverflow.com/q/5802467/1655155
     });
 };
 
@@ -114,11 +119,51 @@ photo.zoom = function(zoom, x, y) {
     // FIXME : De 22h jusqu'à 3h pour pondre une merde pareille :'(
     var x0 = x - this.view.width() / zoom / 2;
     var y0 = y - this.view.height() / zoom / 2;
-    console.log(x0);
+    //console.log(x0);
     this.view.moveTo(x0, y0, zoom);
     
     this._zoom = zoom;
 };
+
+photo.addPoint = function(x, y) {
+    console.log("TODO : addPoint("+x+","+y+")");
+    this.points.add(x, y);
+};
+
+
+
+photo.points = {};
+
+photo.points.init = function(div) {
+    this.$div = div;
+    
+    // TODO : générer un id unique ? ou récupérer dès la création la table fille
+    var tableId = 'ctrl-points-table';
+    div.html('<table id="'+tableId+'"><th>nom</th><th>x</th><th>y</th><th>dir</th><th>lng</th><th>lat</th></table>');
+    this.table = $("#"+tableId, div);  
+};
+
+photo.points.add = function(x, y) {
+    this.list = this.list || [];
+    this.list.push({
+        x: x,
+        y: y,
+        date: new Date()
+    });
+    
+    // Ajout IHM
+    this.table.append('<tr>'+
+        '<td>'+'Point 1'+'</td>'+
+        '<td>'+
+        +Math.round(x)+'</td><td>'
+        +Math.round(y)+'</td><td>'
+        +'290°'+'</td>'+
+        '<td>'+'18°E'+'</td>'+
+        '<td>'+'-40°S'+'</td>'+
+        '</tr>');
+};
+
+
 
 photo.view = {};
 
@@ -236,7 +281,9 @@ photo.selectTool = function(tool) {
     // Ancien outil
     if (this._tool && this._tool.detachFrom) this._tool.detachFrom(this);
     
-    // TODO : check si toutes les méthodes obligatoires sont présentes
+    // check si toutes les méthodes obligatoires sont présentes
+    if (!tool.detachFrom) throw new Error("L'outil doit implémenter la méthode detachFrom(photo)");
+    
     tool.attachTo(this);
     
     this._tool = tool;
@@ -321,5 +368,9 @@ tools.point.attachTo = function(photo) {
 tools.point.mousedown = function(event) {
     var x = this.photo.view.left(event);
     var y = this.photo.view.top(event);
-    console.log("TODO : addPoint("+x+","+y+")");
+    this.photo.addPoint(x, y);
+};
+
+tools.point.detachFrom = function(photo) {
+    photo.$div.unbind('mousedown');
 };
