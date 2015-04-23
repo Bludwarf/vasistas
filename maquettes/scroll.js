@@ -189,16 +189,36 @@ photo.view.centerTo = function(x, y, zoom) {
     this.moveTo(x0, y0, zoom);
 };
 
+/**
+ * 
+ * @param {type} x valeur x sur la photo ou mouse event dont on souhaite récupérer les coords sur la photo
+ * @returns {photo.view@pro;photo@call;zoom|type|@this;@pro;x|Number|photo.view.photo.x}
+ */
 photo.view.left = function(x) {
+    if (x.pageX) return this.x + (x.pageX - this.offset().left) / this.photo.zoom();
     return this.x + x / this.photo.zoom();
 };
 
+/**
+ * 
+ * @param {type} y valeur y sur la photo ou mouse event dont on souhaite récupérer les coords sur la photo
+ * @returns {photo.view@pro;photo@call;zoom|photo.view@call;offset@pro;top|type|Number|@this;@pro;y}
+ */
 photo.view.top = function(y) {
+    if (y.pageY) return this.y + (y.pageY - this.offset().top) / this.photo.zoom();
     return this.y + y / this.photo.zoom();
 };
 
 photo.view.revealAll = function() {
     this.photo.zoom(this.photo._zoomMin);
+};
+
+/**
+ * 
+ * @returns {photo.view@pro;$div@call;offset} Coordonnées du div dans la page HTML
+ */
+photo.view.offset = function() {
+    return this.$div.offset();
 };
 
 photo.infos = {};
@@ -299,5 +319,7 @@ tools.point.attachTo = function(photo) {
 };
 
 tools.point.mousedown = function(event) {
-    console.log("TODO : addPoint");
+    var x = this.photo.view.left(event);
+    var y = this.photo.view.top(event);
+    console.log("TODO : addPoint("+x+","+y+")");
 };
