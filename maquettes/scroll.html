@@ -16,6 +16,7 @@
 			height: 100%;
 			margin: 0;
 			padding: 0;
+            overflow: hidden;
 		}
 		
 		#left {
@@ -23,15 +24,28 @@
 			top: 0;
 			bottom: 0;
 			left: 0;
-			width: 330px; /* mobile */
-			background: #FAA;
-			padding: 5px;
+			width: 340px; /* mobile */
+			background: #888;
 		}
+        
+        #left-top {
+            height: 40%;
+            width: 100%;
+            border-bottom: solid 1px white;
+        }
+        
+        #left-bottom {
+			padding: 5px;
+        }
+        
+        #lists {
+            width: 100%;
+        }
 		
 		#googleMap {
 			width: 100%;
-			height: 200px;
-			background: #F88;
+			height: 100%;
+			background: #8A8;
 		}
 		
 		#middle {
@@ -39,24 +53,43 @@
 			top: 0;
 			left: 340px;
 			bottom: 0;
-			width: 34px;
+			width: 38px;
 			padding: 2px;
-			background: #AAF;
+			background: #444;
 			margin-left: 1px;
 		}
 		
 		#tools {
-			margin: 0;
+			margin: 2px;
 			padding: 0;
 		}
 		
 		#tools .tool {
 			width: 32px;
 			height: 32px;
-			border: solid 1px black;
-			background: #CCC;
-			margin-bottom: 2px;
+			border: solid 1px #AAA;
+            border-radius: 2px;
+            color: white;
+			background: #555;
+			margin-bottom: 4px;
+            box-shadow: 0px 0px 1px white;
+            font-size: 10px;
+            text-align: center;
+            cursor: default;
 		}
+        
+        #tools .tool:hover {
+            background: #666;
+        }
+        
+        #points {
+            /* devrait rester fixe dans sa case */
+            overflow: scroll;
+        }
+        
+        #points table tr:hover td {
+            background: #CCC;
+        }
 		
 		#points table td {
 			border: solid 1px white;
@@ -67,7 +100,7 @@
 			position: absolute;
 			top: 0;
 			bottom: 0;
-			left: 379px;
+			left: 383px;
 			right: 0;
 			background: #AFA;
 			margin-left: 1px;
@@ -78,7 +111,7 @@
 			width: 100%;
 			height: 100%;
 			overflow: hidden;
-			background: #CCC;
+			background: #444;
 		}
 		
 		#photo-hub {
@@ -153,13 +186,15 @@
 				<div id="lists" >
 					<div id="points">
 						<h2>Points de contrôle</h2>
-						<table>
-							<tr><td>#1</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
-							<tr><td>#2</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
-							<tr><td>#3</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
-							<tr><td>#4</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
-							<tr><td>#5</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
-						</table>
+                        <div id="ctrl-points">
+                            <table>
+                                <tr><td>#1</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
+                                <tr><td>#2</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
+                                <tr><td>#3</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
+                                <tr><td>#4</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
+                                <tr><td>#5</td><td>8px,23px</td><td>pos</td><td>149.0°</td>
+                            </table>
+                        </div>
 					</div>
 				</div>
 			</div>
@@ -215,7 +250,8 @@
                     height: 1080
                 },
                 infos: "photo-infos",
-                dock: "photo-dock"
+                dock: "photo-dock",
+                ctrlPoints: "ctrl-points"
             });
             photo.view.revealAll();
             //photo.view.zoom(2); 
