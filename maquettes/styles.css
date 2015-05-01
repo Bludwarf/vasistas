@@ -1,0 +1,180 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 1 mai 2015, 11:22:12
+    Author     : bludwarf
+*/
+
+/* Affichage 95% de l'écran pour le SVG */
+	
+    html, body, .svg-container {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    #left {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 340px; /* mobile */
+        background: #888;
+    }
+
+    #left-top {
+        height: 40%;
+        width: 100%;
+        border-bottom: solid 1px white;
+    }
+
+    #left-bottom {
+        padding: 5px;
+    }
+
+    #lists {
+        width: 100%;
+    }
+
+    #googleMap {
+        width: 100%;
+        height: 100%;
+        background: #8A8;
+    }
+
+    #middle {
+        position: absolute;
+        top: 0;
+        left: 340px;
+        bottom: 0;
+        width: 38px;
+        padding: 2px;
+        background: #444;
+        margin-left: 1px;
+        cursor: col-resize;
+    }
+
+    #tools {
+        margin: 2px;
+        padding: 0;
+    }
+
+    #tools .tool {
+        width: 32px;
+        height: 32px;
+        border: solid 1px #AAA;
+        border-radius: 2px;
+        color: white;
+        background: #555;
+        margin-bottom: 4px;
+        box-shadow: 0px 0px 1px white;
+        font-size: 10px;
+        text-align: center;
+        cursor: default;
+    }
+
+    #tools .tool:hover {
+        background: #666;
+    }
+
+    #points {
+        /* devrait rester fixe dans sa case */
+        overflow: scroll;
+    }
+
+    #points table tr:hover td {
+        background: #CCC;
+        cursor: pointer;
+    }
+
+    #points table td {
+        border: solid 1px white;
+        padding: 2px 4px;
+    }
+
+    #right {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 383px;
+        right: 0;
+        background: #AFA;
+        margin-left: 1px;
+    }			
+
+    #photo-dock {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #444;
+    }
+    
+    #photo-dock > * {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+
+    #photo-hub {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        margin: 5px;
+    }
+
+    #photo-infos {
+        position: absolute;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+        margin: 5px;
+        font-size: 12px;
+        color: white;
+        text-shadow: 0px 0 6px black;
+    }
+
+    #photo-overlay-angles {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        pointer-events: none;
+        margin: 5px;
+        font-size: 12px;
+        color: white;
+        text-shadow: 0px 0 6px black;
+        width: 1920px;
+        height: 1080px;
+    }
+
+    #photo-shadows {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        margin: 0;
+        box-shadow:         inset 0 0 10px #000000;
+    }
+
+    /*#photo {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }*/
+
+    #ctrl-points {
+        font-size: 12px;
+    }

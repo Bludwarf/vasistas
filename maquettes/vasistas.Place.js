@@ -123,14 +123,29 @@ function Place(options) {
     /**
      * Direction terrestre
      */
-    this.getDirection = function() {
-        if (this.heading == null) {
-            var from = this.photo.getLatLng();
+    this.getDirection = function(from) {
+        
+        if (this.heading == null) this.heading = {};
+        
+        var heading = this.heading[from];
+        if (heading == null) {
+            from = from || this.photo.getLatLng();
             var to = this.latLng;
             if (to == null) throw "this.getDirection : impossible d'avoir la direction vers un point inconnu sur la carte";
-            this.heading = google.maps.geometry.spherical.computeHeading(from, to);
+            heading = google.maps.geometry.spherical.computeHeading(from, to);
+            this.heading[from] = heading;
         }
-        return (this.heading+360)%360;
+        
+        var direction = (heading+360)%360;
+        return direction;
+    };
+
+    /**
+     * Direction terrestre
+     */
+    this.getDistance = function(from) {
+        var to = this.latLng;
+        return google.maps.geometry.spherical.computeDistanceBetween(from, to);
     };
 
     /**

@@ -8,166 +8,7 @@
     <!--<script src="js/svg-utils.js"></script>-->
     <!--<script src="js/stab.js"></script>-->
     <!--<script src="js/basse.js"></script>-->
-	<style type="text/css">
-	
-		/* Affichage 95% de l'écran pour le SVG */
-	
-		html, body, .svg-container {
-			height: 100%;
-			margin: 0;
-			padding: 0;
-            overflow: hidden;
-		}
-		
-		#left {
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: 0;
-			width: 340px; /* mobile */
-			background: #888;
-		}
-        
-        #left-top {
-            height: 40%;
-            width: 100%;
-            border-bottom: solid 1px white;
-        }
-        
-        #left-bottom {
-			padding: 5px;
-        }
-        
-        #lists {
-            width: 100%;
-        }
-		
-		#googleMap {
-			width: 100%;
-			height: 100%;
-			background: #8A8;
-		}
-		
-		#middle {
-			position: absolute;
-			top: 0;
-			left: 340px;
-			bottom: 0;
-			width: 38px;
-			padding: 2px;
-			background: #444;
-			margin-left: 1px;
-		}
-		
-		#tools {
-			margin: 2px;
-			padding: 0;
-		}
-		
-		#tools .tool {
-			width: 32px;
-			height: 32px;
-			border: solid 1px #AAA;
-            border-radius: 2px;
-            color: white;
-			background: #555;
-			margin-bottom: 4px;
-            box-shadow: 0px 0px 1px white;
-            font-size: 10px;
-            text-align: center;
-            cursor: default;
-		}
-        
-        #tools .tool:hover {
-            background: #666;
-        }
-        
-        #points {
-            /* devrait rester fixe dans sa case */
-            overflow: scroll;
-        }
-        
-        #points table tr:hover td {
-            background: #CCC;
-        }
-		
-		#points table td {
-			border: solid 1px white;
-			padding: 2px 4px;
-		}
-		
-		#right {
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: 383px;
-			right: 0;
-			background: #AFA;
-			margin-left: 1px;
-		}			
-		
-		#photo-dock {
-			position: relative;
-			width: 100%;
-			height: 100%;
-			overflow: hidden;
-			background: #444;
-		}
-		
-		#photo-hub {
-			position: absolute;
-			top: 0;
-			left: 0;
-			pointer-events: none;
-			margin: 5px;
-		}
-		
-		#photo-infos {
-			position: absolute;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			pointer-events: none;
-			margin: 5px;
-			font-size: 12px;
-			color: white;
-			text-shadow: 0px 0 6px black;
-		}
-		
-		#photo-overlay-angles {
-			position: absolute;
-			top: 0;
-			bottom: 0;
-			left: 0;
-			right: 0;
-			pointer-events: none;
-			margin: 5px;
-			font-size: 12px;
-			color: white;
-			text-shadow: 0px 0 6px black;
-			width: 1920px;
-			height: 1080px;
-		}
-		
-		#photo-shadows {
-			position: absolute;
-			top: 0;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			pointer-events: none;
-			margin: 0;
-			box-shadow:         inset 0 0 10px #000000;
-		}
-		
-		#photo {
-			position: absolute;
-			top: 0;
-			left: 0;
-		}
-		
-				
-	</style>
+	<link rel="stylesheet" type="text/css" href="styles.css" />
 	
     <script type="text/javascript" src="vasistas.Place.js"></script>
     <script type="text/javascript" src="vasistas.Zone.js"></script>
@@ -217,16 +58,7 @@
 		<div id="right">
 			<div id="photo-dock">
 				<div id="photo" class="photo-drag"></div>
-				<div id="photo-overlay-angles" class="photo-drag">
-					<div class="nord">
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-						Nord
-					</div>
-				</div>
+                <canvas id="photo-overlay-angle"></canvas>
 				<div id="photo-shadows"></div>
 				<div id="photo-infos">infos</div>
 				<div id="photo-hub">
@@ -239,20 +71,166 @@
         
     <script>
     	$(document).ready(function() {
-    		
-    		var zoom=1;
+            
+            var degToRad = Math.PI / 180;
+            function rad(deg) {
+                return deg * degToRad;
+            }
+            function deg(rad) {
+                return rad / degToRad;
+            }
+            
+            //var αE = -31.13; // °
+            //var lE = -880;   // px
+            var αE = 194.8583-184.5952; // appart.JPG : centre -> facade beige
+            var lE = 1203-960;   // px
+            var ρE = Math.tan(rad(αE))/lE;
+            var angleIxus = function(x,y, width, height) {
+                var dx = x - width / 2;
+                return deg(Math.atan(dx*ρE));
+            };
+            
+            var dxIxus = function(angle) {
+                return Math.tan(rad(angle)) / ρE;
+            };
             
             photo.init({
                 div: "photo",
                 photo: {
-                    filename: "../photos/rova.jpg",
+                    
+                    // IXUS
                     width: 1920,
-                    height: 1080
+                    height: 1080,
+                    
+                    filename: "../photos/rova.jpg",
+                    //lat: -18.923014,
+                    //lng: 47.532082,
+                    lat: -18.923857,
+                    lng: 47.531719,
+                    pm : 20,
+                    
+                    /*filename: "../photos/appart.JPG",
+                    lat: 48.106314,
+                    lng: -1.666214,
+                    pm : 1,*/
+            
+                    // EOS
+                    /*width: 2592,
+                    height: 1728,
+            
+                    filename: '../photos/18-55/IMG_0254.JPG',
+                    lat: -18.907185, // Chez Francis
+                    lng:  47.527982, // Chez Francis
+                    pm: 5,*/
+                    
+                    getAngle: angleIxus,
+                    dx: dxIxus
                 },
                 infos: "photo-infos",
                 dock: "photo-dock",
                 ctrlPoints: "ctrl-points"
             });
+            photo.points.add([
+                
+                // Rova.jpg 
+                {
+                    name: 'Lac Anda. A bottom-left',
+                    dir: 272.718915972411,
+                    x: 250,
+                    lat: -18.922657,
+                    lng: 47.514780
+                }, {
+                    name: 'Lac Anda. B top-left',
+                    dir: 273.203208362151,
+                    x: 250,
+                    lat: -18.922366,
+                    lng: 47.510606
+                }, {
+                    name: 'Lac Anda. C bottom-right',
+                    dir: 275.263572205116,
+                    x: 327,
+                    lat: -18.922027,
+                    lng:  47.515155
+                },
+                {
+                    name: 'Lac Anda. D top-right',
+                    dir: 275.755325674204,
+                    x: 318,
+                    lat: -18.921509,
+                    lng:  47.510537
+                },
+                {
+                    name: 'Tour Anda. gauche',
+                    x: 275,
+                    lat: -18.922884,
+                    lng:  47.519834
+                },
+                {
+                    name: 'Tour Anda. droite',
+                    x: 289,
+                    lat: -18.922784,
+                    lng:  47.519785
+                },
+                {
+                    name: 'Cabane foot',
+                    dir: 278.66,
+                    x: 427
+                }, {
+                    name: 'Arbre hypodrome',
+                    dir: 288.94,
+                    x: 677
+                }, {
+                    name: 'Bord gauche de l\'immeuble à droite de l\'hypo',
+                    dir: 292.24,
+                    x: 763
+                },
+                {
+                    name: 'Bord droit de l\'immeuble à droite de l\'hypo',
+                    dir: 293.21,
+                    x: 789
+                },
+                {
+                    name: 'Tour Anosy gauche',
+                    x: 1244,
+                    lat: -18.912715,
+                    lng:  47.519531
+                },
+                {
+                    name: 'Tour Anosy droite',
+                    x: 1264,
+                    lat: -18.912618,
+                    lng:  47.519692
+                }
+                
+                // Photo appart.jpg
+                /*{
+                    name: 'Eglise',
+                    x: 946,
+                    lat:  48.095133,
+                    lng: -1.667443
+                },
+                {
+                    name: 'Centre (église clocher gauche)',
+                    x: 960,
+                    lat:  48.095287,
+                    lng: -1.667541
+                },
+                {
+                    name: 'Facade beige',
+                    x: 1203,
+                    lat:  48.101773,
+                    lng: -1.668018
+                }*/
+            
+            
+                // IMG_0254.JPG
+                /*{
+                    name: 'Clocher vert',
+                    x: 350,
+                    lat: -18.914523,
+                    lng:  47.528910
+                }*/
+            ]);
             photo.view.revealAll();
             //photo.view.zoom(2); 
 
