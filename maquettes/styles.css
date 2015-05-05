@@ -22,22 +22,27 @@ and open the template in the editor.
         top: 0;
         bottom: 0;
         left: 0;
-        width: 340px; /* mobile */
+        width: 400px; /* mobile */
         background: #888;
     }
 
     #left-top {
-        height: 40%;
+        height: 200px;
         width: 100%;
         border-bottom: solid 1px white;
     }
 
     #left-bottom {
-        padding: 5px;
-    }
+        position: absolute;
+        top: 201px;
+        bottom: 0;
+    
+        width: 100%;
+}
 
     #lists {
         width: 100%;
+        height: 100%;
     }
 
     #googleMap {
@@ -49,7 +54,7 @@ and open the template in the editor.
     #middle {
         position: absolute;
         top: 0;
-        left: 340px;
+        left: 400px;
         bottom: 0;
         width: 38px;
         padding: 2px;
@@ -83,7 +88,8 @@ and open the template in the editor.
 
     #points {
         /* devrait rester fixe dans sa case */
-        overflow: scroll;
+        overflow: auto;
+        height: 100%;
     }
 
     #points table tr:hover td {
@@ -100,7 +106,7 @@ and open the template in the editor.
         position: absolute;
         top: 0;
         bottom: 0;
-        left: 383px;
+        left: 443px;
         right: 0;
         background: #AFA;
         margin-left: 1px;
@@ -114,7 +120,7 @@ and open the template in the editor.
         background: #444;
     }
     
-    #photo-dock > * {
+    #photo-dock > div {
         position: absolute;
         top: 0;
         left: 0;
@@ -142,20 +148,9 @@ and open the template in the editor.
         color: white;
         text-shadow: 0px 0 6px black;
     }
-
-    #photo-overlay-angles {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
+    
+    #photo-overlays {
         pointer-events: none;
-        margin: 5px;
-        font-size: 12px;
-        color: white;
-        text-shadow: 0px 0 6px black;
-        width: 1920px;
-        height: 1080px;
     }
 
     #photo-shadows {

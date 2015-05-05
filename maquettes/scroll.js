@@ -4,10 +4,13 @@
  * and open the template in the editor.
  */
 
+// TODO : gérer le grab également sur le fond de la photo et pas uniquement sur la photo (Photoshop like)
 
 var photo = {};
             
 photo.init = function(options) {
+    var photo = this;
+    
     var divPhoto = $("#" + options.div);
     this.$div = divPhoto;
     this._zoom = 1;
@@ -45,12 +48,28 @@ photo.init = function(options) {
     
     // Control points
     this.points.init(this, $("#"+options.ctrlPoints));
+    
+    // Resize
+    $(window).resize(function(event) {
+        photo.overlays.resize();
+    });
 };
 
 photo.setPhoto = function(options) {
     this.$div.css("background-image",   "url("+options.filename+")");
     this.width(options.width);
     this.height(options.height);
+};
+
+/**
+ * Appelle automatiquement map.setPhoto
+ * @param {vasistas.Map} map
+ * @returns {undefined}
+ */
+photo.setMap = function(map) {
+    if (this.map == map) return;
+    this.map = map;
+    map.setPhoto(this);
 };
 
 photo.bindDrag = function() {
@@ -157,6 +176,9 @@ photo.zoom = function(zoom, x, y) {
  */
 photo.getDirection = function(x, y) {
     
+    // TODO : pour calculer une approximation plus juste il faudrait baser le calcul en utilisant comme point de repère (étalon "E")
+    // le point connu le plus proche
+    
     // getDirection()
     if (typeof x == 'undefined' && typeof y == 'undefined') {
         var dir = 0;
@@ -177,6 +199,19 @@ photo.getDirection = function(x, y) {
         var angle = this.getAngle(x, y);
         return this.getDirection() + angle;
     }
+};
+
+photo.getHeading = function() {
+    var dir = this.getDirection();
+    return (dir >= 180 ? dir-360 : dir);
+};
+
+/**
+ * 
+ * @returns {google.maps.LatLng}
+ */
+photo.getPosition = function() {
+    return new google.maps.LatLng(this.lat, this.lng);
 };
 
 photo.addPoint = function(x, y) {
@@ -223,6 +258,7 @@ photo.points.init = function(photo, div) {
  * @returns {undefined}
  */
 photo.points.add = function(x, y) {
+    var points = this;
     
     var point;
     if (typeof x.x != 'undefined')
@@ -278,10 +314,27 @@ photo.points.add = function(x, y) {
     );
     var photo = this.photo;
     td.click(function() {
-        photo.overlays.angle.draw(point.dir);
+        points.select(point);
     });
     var tr = $('<tr class="point-data point'+point.i+'"></tr>').append(td);
     this.table.append(tr);
+};
+
+photo.points.select = function(point) {
+    var photo = this.photo;
+    
+    if (point instanceof Place) {
+        console.warn('TODO : photo.points.select.select(Point)');
+    }
+    
+    else if (typeof point.dir != 'undefined') {
+        photo.overlays.angle.draw(point.dir, true);
+    }
+    
+    if (typeof point.lat != 'undefined' && typeof point.lng != 'undefined') {
+        // On le trace aussi sur la carte
+        this.photo.map.drawDirectionTo(new google.maps.LatLng(point.lat, point.lng));
+    }
 };
 
 photo.precision = {};
@@ -371,14 +424,34 @@ photo.view.moveTo = function(x, y, zoom) {
     this.photo.overlays.repaint();
 };
 
+/**
+ * 
+ * @param {type} x
+ * @param {type} y
+ * @param {type} zoom
+ * @returns {undefined}
+ */
 photo.view.centerTo = function(x, y, zoom) {
     if (typeof x == 'undefined') x = this.x;
-    if (typeof y == 'undefined') y = this.y;
     zoom = zoom || this.photo.zoom();
     
-    var x0 = x - this.width()  / 2 / zoom;
-    var y0 = y - this.height() / 2 / zoom;
-    this.moveTo(x0, y0, zoom);
+    var x0 = x - this.width() / 2 / zoom;
+    
+    if (typeof y == 'undefined')
+        this.moveTo(x0, this.y, zoom);
+    else {
+        var y0 = y - this.height() / 2 / zoom;
+        this.moveTo(x0, y0, zoom);
+    }
+};
+
+/**
+ * 
+ * @param {degrés} dir
+ * @returns {undefined}
+ */
+photo.view.centerToDir = function(dir) {
+    this.centerTo(this.photo.x(dir));
 };
 
 /**
@@ -460,6 +533,10 @@ photo.overlays.repaint = function() {
     this.angle.repaint();
 };
 
+photo.overlays.resize = function() {
+    this.angle.resize();
+};
+
 
 photo.overlays.angle = {};
 
@@ -467,14 +544,15 @@ photo.overlays.angle.init = function(photo, $canvas) {
     this.photo = photo;
     this.$canvas = $canvas;
     
-    // Redim du canvas
+    // CSS
     this.$canvas
-        .attr('width',  this.photo.view.width())
-        .attr('height', this.photo.view.height())
-        .css('pointer-events', 'none')
+        .css('pointer-events', 'none') // fantôme pour la souris
     ;
 
     this.ctx = $canvas.get(0).getContext("2d");
+    
+    // Redim du canvas
+    this.resize();
 };
 
 photo.overlays.angle.width = function() {
@@ -485,37 +563,66 @@ photo.overlays.angle.height = function() {
     return this.photo.view.height();
 };
 
-photo.overlays.angle.draw = function(dir) {
-    var ctx = this.ctx;
-    
-    // TODO : Effacer uniquement ce qui a été tracé avant
-    if (typeof this.lastX != 'undefined') {
-        var e = 2;
-        ctx.clearRect(this.lastX - e, 0, 2 * e, this.height());
-    }
-    else
-        ctx.clearRect(0, 0, this.width(), this.height());
-    
+photo.overlays.angle.resize = function() {
+    this.ctx.canvas.width = Math.round(this.width());
+    this.ctx.canvas.height = Math.round(this.height());
+    this.repaint();
+};
+
+/**
+ * 
+ * @param {type} dir
+ * @param {boolean} centerToIfNotVisible? (facultatif) centre la vue si le point n'est pas visible
+ * @returns {undefined}
+ */
+photo.overlays.angle.draw = function(dir, centerToIfNotVisible) {    
     var x = this.photo.view.xDir(dir);
-    this.drawX(x);
+    var visible = this.drawX(x);
+    
+    if (!visible && centerToIfNotVisible) {
+        this.photo.view.centerToDir(dir);
+        this.draw(dir); // on doit tout rappeler car centerToDir appel overlays.repaint()
+    }
     
     this.lastDir = dir;
 };
 
+/**
+ * 
+ * @param {type} x sur la vue (sera arrondi à l'entier pour éviter un tracé baveux sur le canvas)
+ * @param {boolean} centerToIfNotVisible? (facultatif) centre la vue si le point n'est pas visible
+ * @returns {boolean} false si rien n'a été tracé (hors vue)
+ */
 photo.overlays.angle.drawX = function(x) {
     var ctx = this.ctx;
     
+    // Effacer uniquement ce qui a été tracé avant
+    if (typeof this.lastX != 'undefined') {
+        ctx.clearRect(this.lastX, 0, 1, this.height());
+    }
+    else
+        ctx.clearRect(0, 0, this.width(), this.height());
+    
+    
+    x = Math.round(x);
+    var ctx = this.ctx;
+    
     var width = this.photo.view.width();
-    if (x < 0 || x > width) return;
-    var height = this.photo.view.height();
+    if (x < 0 || x > width) return false;
+    var height = Math.round(this.photo.view.height());
+    
+    ctx.imageSmoothingEnabled = false;
+    ctx.lineWidth = 1; // 1px // TODO : pourquoi la taille fait toujours 2px en réelle ?!!
+    ctx.strokeStyle = "#FF0000";
     
     ctx.beginPath();      // Début du chemin
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
+    ctx.moveTo(x+.5, 0.5);
+    ctx.lineTo(x+.5, height-.5);
     ctx.closePath();      // Fermeture du chemin (facultative)
     ctx.stroke();
     
     this.lastX = x;
+    return true;
 };
 
 photo.overlays.angle.repaint = function() {
@@ -611,7 +718,11 @@ tools.point.mousemove = function(event) {
     var x = this.photo.view.left(event);
     //var y = this.photo.view.top(event);
     this.photo.infos.x(x);
-    this.photo.infos.dir(this.photo.getDirection(x));
+    
+    var dir = this.photo.getDirection(x);
+    this.photo.infos.dir(dir);
+    this.photo.overlays.angle.draw(dir);
+    this.photo.map.drawDirection(dir);
 };
 
 tools.point.detachFrom = function(photo) {

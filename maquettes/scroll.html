@@ -12,12 +12,11 @@
 	
     <script type="text/javascript" src="vasistas.Place.js"></script>
     <script type="text/javascript" src="vasistas.Zone.js"></script>
+    <script type="text/javascript" src="vasistas.Map.js"></script>
     <script type="text/javascript" src="scroll.js"></script>
 	
     </head>
     <body>
-	
-		
 		
 		<div id="left">
 			<div id="left-top">
@@ -58,7 +57,9 @@
 		<div id="right">
 			<div id="photo-dock">
 				<div id="photo" class="photo-drag"></div>
-                <canvas id="photo-overlay-angle"></canvas>
+                <div id="photo-overlays">
+                    <canvas id="photo-overlay-angle" width="1236" height="684"></canvas>
+                </div>
 				<div id="photo-shadows"></div>
 				<div id="photo-infos">infos</div>
 				<div id="photo-hub">
@@ -233,6 +234,16 @@
             ]);
             photo.view.revealAll();
             //photo.view.zoom(2); 
+            
+            
+            
+            
+            
+            
+            // GOOGLE
+            map = new vasistas.Map(document.getElementById("googleMap"), {
+                photo: photo
+            });
 
     	});
     </script>
