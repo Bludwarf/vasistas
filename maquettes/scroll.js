@@ -327,7 +327,15 @@ photo.points.select = function(point) {
         console.warn('TODO : photo.points.select.select(Point)');
     }
     
+    // TODO : On utilise en priorité l'info "x sur la photo" avant l'estimation de x en fonction de la direction
+    // TODO : il faut d'abord créer photo.angle.drawXPhoto qui trace non pas une direction sur la photo mais un X (et qui reste)
+    /*else if (typeof point.x != 'undefined') {
+        var viewX = this.photo.view.xPhoto(point.x);
+        photo.overlays.angle.drawX(viewX);
+    }*/
+    
     else if (typeof point.dir != 'undefined') {
+        // trace l'estimation de x en fonction de la direction
         photo.overlays.angle.draw(point.dir, true);
     }
     
@@ -482,6 +490,15 @@ photo.view.top = function(y) {
 photo.view.xDir = function(dir) {
     if (typeof dir == 'undefined') throw new Error('Veuillez indiquer une direction pour avoir le xDir');
     return (this.photo.x(dir) - this.x) * this.photo.zoom();
+};
+
+/**
+ * x sur la vue
+ * @param {px} photoX x sur la photo
+ * @returns {px} x sur la vue
+ */
+photo.view.xPhoto = function(photoX) {
+    return photoX * this.photo.zoom() - this.x;
 };
 
 photo.view.revealAll = function() {
