@@ -5,7 +5,7 @@
  */
 
 
-var photo = {};
+var photo = new Photo();
             
 photo.init = function(options) {
     var divPhoto = $("#" + options.div);
@@ -49,8 +49,8 @@ photo.init = function(options) {
 
 photo.setPhoto = function(options) {
     this.$div.css("background-image",   "url("+options.filename+")");
-    this.width(options.width);
-    this.height(options.height);
+    this.width = options.width;
+    this.height = options.height;
 };
 
 photo.bindDrag = function() {
@@ -101,31 +101,17 @@ photo.bindScroll = function() {
     });
 };
 
-photo.width = function(value) {
-    if (!value) return this._width;
-    this._width = value;
-    this.$div.css("width", value);
-    this.updateZoomMin();
-};
-
-photo.height = function(value) {
-    if (!value) return this._height;
-    this._height = value;
-    this.$div.css("height", value);
-    this.updateZoomMin();
-};
-
 photo.x = function(dir) {
     var angle = dir - this.getDirection();
     var dx = this.dx(angle);
-    return this.width() / 2 + dx;
+    return this.width / 2 + dx;
 };
 
 // private
 photo.updateZoomMin = function() {
     this._zoomMin = Math.min(
-        this.view.width()  / this.width(),
-        this.view.height() / this.height());
+        this.view.width()  / this.width,
+        this.view.height() / this.height);
 };
 
 /**
@@ -345,14 +331,14 @@ photo.view.moveTo = function(x, y, zoom) {
     zoom = zoom || this.photo.zoom();
     
     // TODO : perf OK ?
-    var xMax = this.photo.width()  - this.width()  / zoom;
-    var yMax = this.photo.height() - this.height() / zoom;
+    var xMax = this.photo.width  - this.width()  / zoom;
+    var yMax = this.photo.height - this.height() / zoom;
     x = Math.max(0, Math.min(xMax, x));
     y = Math.max(0, Math.min(yMax, y));
     
-    var mx = zoom > 1 ? this.photo.width()  * (zoom - 1) / 2 : -this.photo.width()  * (1 - zoom) / 2;
+    var mx = zoom > 1 ? this.photo.width  * (zoom - 1) / 2 : -this.photo.width  * (1 - zoom) / 2;
     mx -= x * zoom;
-    var my = zoom > 1 ? this.photo.height() * (zoom - 1) / 2 : -this.photo.height() * (1 - zoom) / 2;
+    var my = zoom > 1 ? this.photo.height * (zoom - 1) / 2 : -this.photo.height * (1 - zoom) / 2;
     my -= y * zoom;
     
     var matrix = zoom + ",0,0," + zoom + "," + mx + "," + my;
