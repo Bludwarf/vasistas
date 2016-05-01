@@ -6,13 +6,16 @@
         <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
         <script src="http://maps.googleapis.com/maps/api/js?libraries=geometry"></script>
         <!--<script src="js/svg-utils.js"></script>-->
-        <!--<script src="js/stab.js"></script>-->
-        <!--<script src="js/basse.js"></script>-->
         <link rel="stylesheet" type="text/css" href="styles.css" />
 
         <script type="text/javascript" src="vasistas.Place.js"></script>
         <script type="text/javascript" src="vasistas.Zone.js"></script>
         <script type="text/javascript" src="vasistas.Photo.js"></script>
+        <script type="text/javascript" src="vasistas.Photo.Infos.js"></script>
+        <script type="text/javascript" src="vasistas.Photo.Overlays.js"></script>
+        <script type="text/javascript" src="vasistas.Photo.Points.js"></script>
+        <script type="text/javascript" src="vasistas.photo.Precision.js"></script>
+        <script type="text/javascript" src="vasistas.photo.View.js"></script>
         <script type="text/javascript" src="scroll.js"></script>
 	
     </head>
@@ -72,6 +75,13 @@
         
     <script>
     	$(document).ready(function() {
+
+            /*points = Place.loadPoints({
+                rova  : {lat: -18.92348100124909,   lng: 47.53185215892805},
+                lac   : {lat: -18.9226356424,       lng: 47.5148770807},        // 273.01081393192686° x=252
+                anosy : {lat: -18.91366689,         lng: 47.5221688827},        // 316.97226770386897° x=1360
+                usine : {lat: -18.92279776874189,   lng: 47.51983074455688}
+            });*/
             
             var degToRad = Math.PI / 180;
             function rad(deg) {
@@ -95,7 +105,7 @@
                 return Math.tan(rad(angle)) / ρE;
             };
             
-            photo.init({
+            photo = new Photo({
                 div: "photo",
                 photo: {
                     
