@@ -3,11 +3,25 @@
     <head>
         <title>Vasistas - Géolocalisation sur un paysage</title> 
 		
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-	<script src="http://maps.googleapis.com/maps/api/js?libraries=geometry"></script>
-    <!--<script src="js/svg-utils.js"></script>-->
-    <!--<script src="js/stab.js"></script>-->
-    <!--<script src="js/basse.js"></script>-->
+	    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://maps.googleapis.com/maps/api/js?libraries=geometry&key=AIzaSyAZoJama8xXThTE7yIxakZHQrSIDZVGiCA"></script>
+        <!--<script src="js/svg-utils.js"></script>-->
+        <link rel="stylesheet" type="text/css" href="styles.css" />
+
+		<script type="text/javascript" src="js/lodash.core.min.js"></script>
+        <script type="text/javascript" src="js/SVGUtils.js"></script>
+        <script type="text/javascript" src="vasistas.Place.js"></script>
+        <script type="text/javascript" src="vasistas.Zone.js"></script>
+        <script type="text/javascript" src="vasistas.Photo.js"></script>
+        <script type="text/javascript" src="vasistas.Photo.Infos.js"></script>
+        <script type="text/javascript" src="vasistas.Photo.Overlays.js"></script>
+        <script type="text/javascript" src="vasistas.Photo.Points.js"></script>
+        <script type="text/javascript" src="vasistas.photo.Precision.js"></script>
+        <script type="text/javascript" src="vasistas.photo.View.js"></script>
+        <script type="text/javascript" src="scroll.js"></script>
+        
+        <script type="text/javascript" src="photo-rova.js"></script>
+    
 	<style type="text/css">
 	
 		/* Affichage 95% de l'écran pour le SVG */
@@ -158,31 +172,6 @@
         
     <script type="text/javascript" src="vasistas.Photo.js"></script>
 	<script type="text/javascript">
-	
-	
-		// SVG Utils : http://toddmotto.com/hacking-svg-traversing-with-ease-addclass-removeclass-toggleclass-functions/
-		
-		SVGElement.prototype.hasClass = function (className) {
-		  return new RegExp('(\\s|^)' + className + '(\\s|$)').test(this.getAttribute('class'));
-		};
-		SVGElement.prototype.addClass = function (className) {
-		  if (!this.hasClass(className)) {
-			this.setAttribute('class', this.getAttribute('class') + ' ' + className);
-		  }
-		};
-		SVGElement.prototype.removeClass = function (className) {
-		  var removedClass = this.getAttribute('class').replace(new RegExp('(\\s|^)' + className + '(\\s|$)', 'g'), '$2');
-		  if (this.hasClass(className)) {
-			this.setAttribute('class', removedClass);
-		  }
-		};
-		SVGElement.prototype.toggleClass = function (className) {
-		  if (this.hasClass(className)) {
-			this.removeClass(className);
-		  } else {
-			this.addClass(className);
-		  }
-		};
 	
 		$(document).ready(function(){
 		

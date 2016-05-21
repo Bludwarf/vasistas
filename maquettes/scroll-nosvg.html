@@ -68,54 +68,8 @@
 			<div id="photo-dock">
 				<div id="photo" class="photo-drag"></div>
 
-				<!-- Commenter cette élément pour faire marcher le scroll et le zoom -->
-				<div class="svg-container">
-					<svg id="ecran" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-			viewBox="0 0 1920 1080" enable-background="new 0 0 693 2371" xml:space="preserve">
+				<!-- SVG -->
 
-				<image class="photo" x="0" y="0" width="1920" height="1080" xlink:href="../photos/rova.jpg" /><!-- 265.559861911151° + 71.3144809503602° -->
-
-
-
-				<!-- Lignes boussole -->
-
-				<line x1="120"  y1="0" x2="120"  y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-width="3"       />	<!-- 270°   : W -->
-				<text x="124" y="14" text-anchor="start" fill="#FFF">W</text>
-
-				<line x1="725"  y1="0" x2="725"  y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-dasharray="5,5" />	<!-- 292.5° : NWW -->
-				<text x="729" y="14" text-anchor="start" fill="#FFF">NWW</text>
-
-				<line x1="1331" y1="0" x2="1331" y2="1080" style="stroke:#FFF; opacity: 0.5;" />						<!-- 315°   : NW -->
-				<text x="1335" y="14" text-anchor="start" fill="#FFF">NW</text>
-
-				<line x1="1937" y1="0" x2="1937" y2="1080" style="stroke:#FFF; opacity: 0.5;" stroke-dasharray="5,5" />	<!-- 337.5° : NNW -->
-				<text x="1941" y="14" text-anchor="start" fill="#FFF">NNW</text>
-
-
-
-				<!-- horizon -->
-				<line x1="0" y1="267" x2="1920" y2="267" style="stroke:#FFF; opacity: 1;" stroke-dasharray="5,5" />
-
-				<!-- Axe myPlace - lac Anda -->
-				<!--<line x1="250" y1="0" x2="250" y2="1080" style="stroke:#0000FF; opacity: 1;" />
-				<line x1="327" y1="0" x2="327" y2="1080" style="stroke:#0000FF; opacity: 1;" />
-				<line x1="250" y1="417" x2="276" y2="472" style="stroke:#00AAFF; opacity: 1;" />
-				<line x1="40" y1="0" x2="585" y2="1080" style="stroke:#FF0000; opacity: 1;" />--> <!-- jonction avec le centre (x=960) : y=1824 -->
-
-				<!-- Axe arrête - lac Anda "D" -->
-				<!--<line x1="109" y1="0" x2="677" y2="1080" style="stroke:#FF0000; opacity: 1;" />-->
-
-				<!-- Position de la souris -->
-
-				<text id="infos" x="4" y="14" text-anchor="start" fill="#FFF" style="text-shadow: 0px 0px 2px #000;" pointer-events="none">
-					<tspan class="angle">265.6°</tspan>
-					<tspan class="x" 		x="4" dy="1.2em">x=1</tspan>
-					<tspan class="offsetX" 	x="4" dy="1.2em">offsetX=1</tspan>
-					<tspan class="zoom" 	x="4" dy="1.2em">zoom=100%</tspan>
-				</text>
-
-			</svg>
-				</div>
                 <canvas id="photo-overlay-angle"></canvas>
 				<div id="photo-shadows"></div>
 				<div id="photo-infos">infos</div>

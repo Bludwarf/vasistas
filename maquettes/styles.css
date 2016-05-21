@@ -178,3 +178,11 @@ and open the template in the editor.
     #ctrl-points {
         font-size: 12px;
     }
+
+
+
+
+/* SVG */
+.zone-svg {
+    cursor: pointer;
+}

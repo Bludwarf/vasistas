@@ -60,7 +60,7 @@ function Zone(options) {
 	this.getPaths = function() {
 		var paths = [];
 		$.each(this.places, function(i, place) {
-			paths[paths.length] = place.getLatLng();
+			paths[paths.length] = place.latLng;
 		});
 		return paths;
 	};
@@ -99,27 +99,13 @@ function Zone(options) {
 	};
 
 	/**
-	 * @return Place
-	 */
-	this.getCenter = function() {
-		var center = this.getBounds().getCenter();
-		var place = new Place({
-			lat: center.lat(),
-			lng: center.lng(),
-			x: 'todo', // TODO : center x,y
-			y: 'todo'
-		});
-		return place;
-	};
-
-	/**
 	 * @return Bounds
 	 */
 	this.getBounds = function() {
 		var bounds = new google.maps.LatLngBounds();
 
 		$.each(this.places, function(i, place) {
-			bounds.extend(place.getLatLng());
+			bounds.extend(place.latLng);
 		});
 
 		return bounds;
@@ -167,7 +153,7 @@ function Zone(options) {
 		// Zoom dans la map
 		var poly = this.getPolygon();
 		//window.poly = poly; // variable globale
-		poly.get('map').setCenter(this.getCenter().getLatLng());
+		poly.get('map').setCenter(this.center.latLng);
 	};
 
 	/**
@@ -206,7 +192,7 @@ function Zone(options) {
 	this.getSVGPath = function() {
 		var d = "M";
 		$.each(this.places, function(i, place) {
-				d += place.getX() + "," + place.getY() + " ";
+				d += place.x + "," + place.y + " ";
 		});
 		d += "Z";
 		return d;
@@ -266,3 +252,23 @@ function Zone(options) {
 		this.setMap(options.map);
 	};
 }
+
+Object.defineProperties(Zone.prototype, {
+
+	/**
+	 * @return Place
+	 */
+	center: {
+		get: function () {
+			var center = this.getBounds().getCenter();
+			var place = new Place({
+				lat: center.lat(),
+				lng: center.lng(),
+				x: 'todo', // TODO : center x,y
+				y: 'todo'
+			});
+			return place;
+		}
+	}
+
+});

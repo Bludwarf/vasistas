@@ -48,8 +48,8 @@ Place.prototype.appearsAt = function(x, y, photo) {
 
     this.x = x;
     this.y = y;
-    this.posX = x / photo.getWidth();
-    this.posY = y / photo.getHeight();
+    this.posX = x / photo.width;
+    this.posY = y / photo.height;
 
     this.heading = null; // heading à recalculer
 
@@ -72,10 +72,10 @@ Object.defineProperties(Place.prototype, {
      */
     angle: {
         get: function() {
-            var xMax = this.photo.getWidth();
-            var ratio = this.getX() / xMax;
+            var xMax = this.photo.width;
+            var ratio = this.x / xMax;
             //console.log(this.getX() + " / " + xMax);
-            return ratio * this.photo.getAngle();
+            return ratio * this.photo.angle;
         }
     },
 
@@ -88,7 +88,7 @@ Object.defineProperties(Place.prototype, {
          * @returns {google.maps.Marker}
          */
         get: function() {
-            if (this._marker) {
+            if (!this._marker) {
                 // options : https://developers.google.com/maps/documentation/javascript/reference#MarkerOptions
                 this._marker = new google.maps.Marker({
                     position: this.latLng,
@@ -123,7 +123,7 @@ Place.prototype.getDirection = function(from) {
 
     var heading = this.heading[from];
     if (heading == null) {
-        from = from || this.photo.getLatLng();
+        from = from || this.photo.latLng;
         var to = this.latLng;
         if (to == null) throw "this.getDirection : impossible d'avoir la direction vers un point inconnu sur la carte";
         heading = google.maps.geometry.spherical.computeHeading(from, to);
