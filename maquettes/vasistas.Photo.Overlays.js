@@ -22,6 +22,7 @@
 
     function Angle(photo, $canvas) {
         this.photo = photo;
+        if (!$canvas.get(0)) throw new Error("Aucun élément canvas trouvé");
         this.$canvas = $canvas;
 
         // Redim du canvas
